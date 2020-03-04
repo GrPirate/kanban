@@ -1,6 +1,7 @@
 <template lang="html">
   <div
-    class="block-body"
+    class="card-body"
+    v-if="expend || taskIndex === 0"
     @mousedown.stop
     @click.stop>
     <draggable
@@ -29,7 +30,6 @@
         </div>
         <div
           class="task-wrap"
-          @mousedown.prevent
           v-if="isShowDefalut">
           <div class="task-view">
             <div class="edit-card">
@@ -78,7 +78,7 @@
                     placement="bottom"
                     width="200"
                     :visible-arrow="false"
-                    v-model="task.show_card_type"
+                    v-model="estimateVisible"
                     trigger="click">
                     <div>
                       <i class="icon iconfont gr-icon-hourglass1"></i>
@@ -86,7 +86,7 @@
                     </div>
                     <el-input v-model="task.estimate" size="small" style="margin-top: 10px;"></el-input>
                     <el-button type="success" size="small" @click="saveEstimate(task)" style="margin-top: 10px;">保存</el-button>
-                    <el-button type="text" style="margin-left: 10px;" @click="task.show_card_type = false">取消</el-button>
+                    <el-button type="text" style="margin-left: 10px;" @click="estimateVisible = false">取消</el-button>
                     <span title="工时" class="estimate" slot="reference">{{task.estimate}}</span>
                   </el-popover>
                 </div>
@@ -109,6 +109,7 @@ export default {
   data () {
     return {
       visible: false,
+      estimateVisible: false,
       addCard: {
         cardName: '',
         estimate: null,
@@ -135,7 +136,8 @@ export default {
     taskIndex: Number,
     laneIndex: Number,
     blockIndex: Number,
-    listdata: Object
+    listdata: Object,
+    expend: Boolean
   },
   filters: {
     format (val, arg) {
@@ -155,7 +157,7 @@ export default {
       // 设置任务结束时间
     },
     saveEstimate: function (task) {
-      task.show_card_type = false
+      this.estimateVisible = false
       // 保存工时操作
     },
     computedShowLabel () {
@@ -219,6 +221,13 @@ export default {
 </script>
 
 <style lang="less">
+.x-drag-mark {
+  z-index: 9999 !important;
+}
+.card-body {
+  position: relative;
+  z-index: 99;
+}
 .block-wrap {
   background-color: #e5e9f2;
   flex: 0 0 300px;

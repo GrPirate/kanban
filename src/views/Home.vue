@@ -85,8 +85,27 @@
           :lane-index="index"
           :listdata="res"
           :data="lane"></lane>
-        <div class="add-lane">
-          <el-button type="info">添加泳道</el-button>
+        <div class="add-lane" v-if="!addVisible">
+          <el-button type="info" @click="addVisible = true">添加泳道</el-button>
+        </div>
+        <div class="lane_add" v-if="addVisible" v-clickoutside="handleClose">
+          <div class="panel-footer padding-three">
+            <div class="form-signin">
+              <div>
+                <div class="form-group">
+                  <el-input v-model="input" placeholder="请输入内容"></el-input>
+                </div>
+                <div class="form-group" style="display:flex;margin-top: 5px;">
+                  <el-button type="success" size="small" @click="addLane">
+                    添加泳道
+                  </el-button>
+                  <el-button size="small" @click="addVisible = false">
+                    取消
+                  </el-button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       <!-- 主要内容模块 -->
         <!-- <list
@@ -144,6 +163,7 @@ import data from '../mock/mock.js'
 import res from '../mock/data.js'
 import MinEdit from '@/components/CardEditor'
 import PopOver from '@/components/PopOver'
+import Clickoutside from 'element-ui/src/utils/clickoutside'
 let dataBus = new Vue({})
 export default {
   name: 'home',
@@ -156,9 +176,12 @@ export default {
       dataBus,
       isAddList: false,
       showScroll: false,
-      isShowHeadOpt: false
+      isShowHeadOpt: false,
+      addVisible: false,
+      input: '' // 添加泳道临时值
     }
   },
+  directives: { Clickoutside },
   components: {
     // List,
     Edit,
@@ -293,6 +316,12 @@ export default {
       document.onmouseup = function () {
         this.onmousemove = this.onmouseup = null
       }
+    },
+    handleClose () {
+      this.addVisible = false
+    },
+    addLane () {
+      // 添加泳道
     }
   },
   updated () {
@@ -312,8 +341,18 @@ export default {
 
 <style lang="less">
 @import '../assets/style/main.less';
-.lane {
-  margin: 30px 10px;
+.add-lane {
+  margin: 40px 10px;
   text-align: left;
+}
+.lane_add {
+  z-index: 1000;
+  width: 257px;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
+  padding: 5px;
+  border-radius: 4px;
+  -webkit-box-shadow: 0 0 8px #000;
+  box-shadow: 0 0 8px #000;
 }
 </style>

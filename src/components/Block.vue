@@ -8,11 +8,20 @@
         :lane-index="laneIndex"
         :block-index="blockIndex"
         :listdata="listdata"
+        :expend="expend"
         :task="task"
         ></block-item>
-      <div class="task-wrap" v-show="visible" v-clickoutside="handleClose">
+      <div class="block-empty" style="z-index: 10;bottom: 9px;" v-if="!expend"></div>
+      <div class="block-empty" style="z-index: 9;bottom: 6px;" v-if="!expend"></div>
+      <div class="block-empty" style="z-index: 8;bottom: 3px;" v-if="!expend"></div>
+    </div>
+    <div class="block-footer"
+      @mousedown.stop
+      @click.stop>
+      <div class="task-wrap" v-show="visible">
         <div class="list-add-card-wrap">
           <el-input
+            placeholder="请填写卡片名称"
             v-model="addCard.cardName"></el-input>
           <div class="list-add-card-fun add-datetime">
             <div title="工时" style="cursor:pointer">
@@ -49,15 +58,40 @@
           </div>
         </div>
       </div>
-    </div>
-    <div class="block-footer">
-      <div class="list-add-card" v-show="!visible">
-        <a href="#" class="list-add-card-btn" @click="visible = true">添加卡片</a>
-      </div>
+      <draggable>
+        <droppable
+          class="drop-box"
+          @dragend="onDragEnd"
+          @drop="onDrop"
+          @dragenter="onDragEnter"
+          @dragleave="onDragLeave"
+        >
+        <!-- 检测到拖动时显示的 -->
+          <div
+            class="task-wrap"
+            v-show="isShowDrop"
+          >
+            <div
+              class="task-view"
+              :style="dropBox"
+            >
+            </div>
+          </div>
+          <div class="list-add-card" v-show="!visible">
+            <a href="#" class="list-add-card-btn" @click="visible = true">添加卡片</a>
+            <div class="card-expend" @click="toggleExpend">
+              <i class="el-icon-arrow-up card-up" v-if="expend"></i>
+              <i class="el-icon-arrow-down card-down" v-if="!expend"></i>
+            </div>
+          </div>
+        </droppable>
+      </draggable>
     </div>
   </div>
 </template>
 <script>
+import Draggable from './draggable.vue'
+import Droppable from './droppable.vue'
 import Clickoutside from 'element-ui/src/utils/clickoutside'
 import BlockItem from './Block-item.vue'
 
@@ -71,11 +105,23 @@ export default {
         estimate: null,
         deadline: null,
         visible: false
+      },
+      isShowDrop: false,
+      isShowDefalut: true,
+      expend: true, // 是否展开
+      dropBox: {
+        margin: '10px 0 0 0',
+        height: '200px',
+        backgroundColor: '#c4c9cc'
       }
     }
   },
   directives: { Clickoutside },
-  components: { BlockItem },
+  components: {
+    Draggable,
+    Droppable,
+    BlockItem
+  },
   props: {
     data: Object,
     laneIndex: Number,
@@ -91,12 +137,42 @@ export default {
     },
     handleClose: function () {
       this.visible = false
+    },
+    onDragEnter (params) {
+      // 克隆出来的节点获取
+      var mark = document.querySelector('.x-drag-mark')
+      let dragHeight = mark.children[0].style.height
+      // 进入自身的dropbox不需要有交互
+      // 显示阴影框并且修改框的样式
+      this.isShowDrop = true
+      this.dropBox.height = dragHeight
+    },
+    onDragEnd (params) {
+      // 隐藏阴影框
+      // 还原默认的内容框
+      this.isShowDrop = false
+      this.isShowDefalut = true
+    },
+    onDrop (params) {
+      // debugger
+      // drop 的列表添加数据
+    },
+    onDragLeave (params) {
+      // 隐藏阴影框
+      this.isShowDrop = false
+    },
+    toggleExpend () {
+      this.expend = !this.expend
     }
   }
 }
 </script>
 
 <style lang="less">
+.block-body {
+  position: relative;
+}
+
 .block-wrap {
   background-color: #e5e9f2;
   flex: 0 0 300px;
@@ -113,6 +189,17 @@ export default {
   border-top-left-radius: 0;
   border-top-right-radius: 0;
 }
+
+.block-empty {
+  border: 1px solid #ccc;
+  background-color: #fff;
+  border-radius: 4px;
+  margin: 0 10px;
+  height: 20px;
+  position: absolute;
+  width: 93%;
+}
+
 .task-wrap {
   position: relative;
 }
@@ -156,16 +243,39 @@ export default {
   display: flex;
   width: 100%;
   height: 30px;
+  justify-content: space-between;
 }
 .list-add-card-btn {
   padding-left: 5px;
   color: #888;
   height: 30px;
   line-height: 30px;
-  display: inline-block;
+  display: block;
+}
+
+.card-expend {
+  line-height: 30px;
+  cursor: pointer;
+}
+
+.card-expend .card-up,
+.card-expend .card-down {
+  transition: all .5s;
+}
+
+.card-expend .card-up:hover {
+  transform: scale(1.5)
+}
+
+.card-expend .card-down:hover {
+  transform: scale(1.5)
 }
 
 .list-add-card-wrap {
-  margin: 10px;
+  margin-top: 10px;
+}
+
+.list-add-card-fun {
+  margin-top: 10px;
 }
 </style>
